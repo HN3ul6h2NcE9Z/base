@@ -50,16 +50,26 @@ export default function Projects() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['projects'] }),
   });
 
-  const handleSubmit = (data) => {
-    if (editing) {
-      if (data.status === 'Closed' && !editing.closed_date) data.closed_date = new Date().toISOString();
-      else if (data.status !== 'Closed') data.closed_date = null;
-      updateMutation.mutate({ id: editing.id, data });
-    } else {
-      createMutation.mutate(data);
+  const handleSubmit = async (data) => {
+    try {
+      if (editing) {
+        updateMutation.mutate({ id: editing.id, data });
+      } else {
+        createMutation.mutate(data);
+
+        const res = await fetch('/api/send-invite', {
+          method: 'POST',
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          console.error('Invite email failed:', err);
+        }
+      }
+    } catch (err) {
+      console.error('Submission failed:', err);
     }
   };
-
   const openEdit = (p) => { setEditing(p); setDialogOpen(true); };
   const openCreate = () => { setEditing(null); setDialogOpen(true); };
 

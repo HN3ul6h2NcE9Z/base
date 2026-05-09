@@ -21,14 +21,19 @@ export default function ProjectForm({ project, onSubmit, onCancel, isLoading }) 
 
   const set = (key, val) => setForm(f => ({ ...f, [key]: val }));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const data = { ...form };
-    if (data.start_date) data.start_date = new Date(data.start_date).toISOString();
-    if (data.end_date) data.end_date = new Date(data.end_date).toISOString();
-    onSubmit(data);
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
+  try {
+    await fetch('/api/send-invite', {
+      method: 'POST',
+    });
+
+    onSubmit?.(); // optional success callback
+  } catch (err) {
+    console.error('Email send failed', err);
+  }
+  };
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
